@@ -1,4 +1,5 @@
 require_relative 'ui'
+require_relative 'heroi'
 
 def le_mapa(numero)
     arquivo = "mapa#{numero}.txt"
@@ -13,26 +14,13 @@ def encontra_jogador(mapa)
         coluna_do_heroi = linha_atual.index caractere_do_heroi
         
         if coluna_do_heroi
-            return [linha, coluna_do_heroi]
+            jogador = Heroi.new
+            jogador.linha = linha
+            jogador.coluna = coluna_do_heroi
+            return jogador
         end
     end
     nil
-end
-
-def calcula_nova_posicao heroi, direcao
-    heroi = heroi.dup
-    
-    movimentos = {
-        "W" => [-1, 0],
-        "S" => [+1, 0],
-        "A" => [0, -1],
-        "D" => [0, +1]
-    }
-    
-    movimento = movimentos[direcao]
-    heroi[0] += movimento[0]
-    heroi[1] += movimento[1]
-    heroi
 end
 
 def posicao_valida? mapa, posicao
@@ -111,13 +99,14 @@ def joga(nome)
     while true
         desenha mapa
         direcao = pede_movimento
-        heroi = encontra_jogador mapa        
-        nova_posicao = calcula_nova_posicao heroi, direcao
+        heroi = encontra_jogador mapa
+        nova_posicao = heroi.calcula_nova_posicao direcao
 
-        next if !posicao_valida? mapa, nova_posicao
+        #next if !posicao_valida? mapa, nova_posicao.to_array
+        next unless posicao_valida? mapa, nova_posicao.to_array
         
-        mapa[heroi[0]][heroi[1]] = " "
-        mapa[nova_posicao[0]][nova_posicao[1]] = "H"
+        heroi.remove_do mapa
+        nova_posicao.coloca_no mapa
 
         mapa = move_fantasmas mapa
         if jogador_perdeu? mapa
